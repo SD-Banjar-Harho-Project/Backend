@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import pool from "../config/database.js"; // TAMBAHKAN INI
 import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/responseHelper.js";
 
@@ -59,8 +60,21 @@ export const login = async (req, res, next) => {
       return errorResponse(res, "Invalid credentials", 401);
     }
 
+    // TAMBAHAN INI - Get role name from database
+    const [roles] = await pool.execute("SELECT name FROM roles WHERE id = ?", [
+      user.role_id,
+    ]);
+    const roleName = roles[0]?.name || "user";
+
+    // Token sudah include role name
     const token = jwt.sign(
-      { userId: user.id, username: user.username },
+      {
+        id: user.id, // UBAH dari userId jadi id
+        userId: user.id, // Tetap ada untuk backward compatibility
+        username: user.username,
+        role_id: user.role_id,
+        role: roleName, // TAMBAHAN INI
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
@@ -73,7 +87,10 @@ export const login = async (req, res, next) => {
     return successResponse(
       res,
       {
-        user,
+        user: {
+          ...user,
+          role: roleName, // TAMBAHAN INI di response
+        },
         token,
       },
       "Login successful"
@@ -94,7 +111,20 @@ export const getProfile = async (req, res, next) => {
     delete user.password_hash;
     delete user.remember_token;
 
-    return successResponse(res, user, "Profile retrieved successfully");
+    // TAMBAHAN - include role name
+    const [roles] = await pool.execute("SELECT name FROM roles WHERE id = ?", [
+      user.role_id,
+    ]);
+    const roleName = roles[0]?.name || "user";
+
+    return successResponse(
+      res,
+      {
+        ...user,
+        role: roleName,
+      },
+      "Profile retrieved successfully"
+    );
   } catch (error) {
     next(error);
   }

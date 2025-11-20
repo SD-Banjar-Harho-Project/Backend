@@ -195,3 +195,41 @@ export const deletePost = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get deleted posts (recycle bin)
+export const getDeletedPosts = async (req, res, next) => {
+  try {
+    const { page, limit, offset } = getPaginationParams(req);
+
+    const posts = await Post.findDeleted(limit, offset);
+    const total = await Post.countDeleted();
+
+    return paginatedResponse(
+      res,
+      posts,
+      page,
+      limit,
+      total,
+      "Deleted posts retrieved successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Restore deleted post
+export const restorePost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const post = await Post.restore(id);
+
+    if (!post) {
+      return errorResponse(res, "Post not found or already active", 404);
+    }
+
+    return successResponse(res, post, "Post restored successfully");
+  } catch (error) {
+    next(error);
+  }
+};
