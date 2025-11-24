@@ -191,7 +191,7 @@ Dependencies yang akan terinstall:
 #### B. Create Database
 1. Buka browser: `http://localhost/phpmyadmin`
 2. Klik **"New"** untuk create database
-3. Nama database: `dbsdnbandarharjo`
+3. Nama database: `kp_diskominfo`
 4. Collation: `utf8mb4_unicode_ci`
 5. Klik **"Create"**
 
