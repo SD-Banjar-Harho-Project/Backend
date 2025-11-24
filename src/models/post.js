@@ -45,6 +45,15 @@ class Post {
     return rows[0];
   }
 
+  static async findBySlugExcludingId(slug, id) {
+    const [rows] = await pool.execute(
+      `SELECT * FROM posts 
+     WHERE slug = ? AND id != ? AND deleted_at IS NULL`,
+      [slug, id]
+    );
+    return rows[0];
+  }
+
   static async findByAuthor(authorId) {
     const [rows] = await pool.execute(
       `SELECT p.*, u.full_name as author_name 
@@ -58,22 +67,22 @@ class Post {
   }
 
   static async create(data) {
-    const { author_id, title, slug, content, status } = data;
+    const { author_id, title, slug, content, status, img_url } = data;
 
     const [result] = await pool.execute(
-      "INSERT INTO posts (author_id, title, slug, content, status) VALUES (?, ?, ?, ?, ?)",
-      [author_id, title, slug, content, status || "draft"]
+      "INSERT INTO posts (author_id, title, slug, content, status, img_url) VALUES (?, ?, ?, ?, ?, ?)",
+      [author_id, title, slug, content, status || "draft", img_url]
     );
 
     return this.findById(result.insertId);
   }
 
   static async update(id, data) {
-    const { title, slug, content, status } = data;
+    const { title, slug, content, status, img_url } = data;
 
     await pool.execute(
-      "UPDATE posts SET title = ?, slug = ?, content = ?, status = ? WHERE id = ?",
-      [title, slug, content, status, id]
+      "UPDATE posts SET title = ?, slug = ?, content = ?, status = ?, img_url = ? WHERE id = ?",
+      [title, slug, content, status, img_url, id]
     );
 
     return this.findById(id);

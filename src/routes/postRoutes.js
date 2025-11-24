@@ -2,6 +2,7 @@ import express from "express";
 import { body } from "express-validator";
 import { validate } from "../middlewares/validator.js";
 import { authenticate, authorize } from "../middlewares/authMiddleware.js";
+import { uploadImage } from "../middlewares/upload.js";
 import * as postController from "../controllers/postController.js";
 
 const router = express.Router();
@@ -9,47 +10,62 @@ const router = express.Router();
 // =======================
 // PUBLIC ROUTES
 // =======================
-
-// Semua post (published + draft jika admin)
 router.get("/", postController.getAllPosts);
-
-// Get post by ID (public)
 router.get("/id/:id", postController.getPostById);
-
-// Get post by slug (public)
 router.get("/slug/:slug", postController.getPostBySlug);
 
 // =======================
-// PROTECTED ROUTES (admin/superadmin only)
+// PROTECTED ROUTES
 // =======================
 
-// Create post
+// Create Post
 router.post(
   "/",
   authenticate,
   authorize("admin", "superadmin"),
+
+  // Set upload folder: uploads/posts/
+  (req, res, next) => {
+    req.uploadSubDir = "posts";
+    next();
+  },
+
+  // Multer harus duluan agar req.body terisi
+  uploadImage.single("image"),
+
+  // Lalu validator dibaca dari req.body yang sudah lengkap
   [
     body("title").notEmpty().withMessage("Title is required"),
     body("content").notEmpty().withMessage("Content is required"),
     validate,
   ],
+
   postController.createPost
 );
 
-// Update post
+// Update Post
 router.put(
   "/:id",
   authenticate,
   authorize("admin", "superadmin"),
+
+  (req, res, next) => {
+    req.uploadSubDir = "posts";
+    next();
+  },
+
+  uploadImage.single("image"),
+
   [
     body("title").optional().notEmpty(),
     body("content").optional().notEmpty(),
     validate,
   ],
+
   postController.updatePost
 );
 
-// Soft delete
+// Soft Delete
 router.delete(
   "/:id",
   authenticate,

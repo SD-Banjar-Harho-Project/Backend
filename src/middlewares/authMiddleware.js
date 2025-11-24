@@ -1,8 +1,10 @@
 import jwt from "jsonwebtoken";
 import { errorResponse } from "../utils/responseHelper.js";
 import User from "../models/user.js";
-import pool from "../config/database.js"; // TAMBAHKAN INI
 
+// ======================================================
+// AUTHENTICATE (WAJIB LOGIN)
+// ======================================================
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -11,11 +13,12 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, "No token provided", 401);
     }
 
-    const token = authHeader.substring(7);
+    const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.userId || decoded.id);
+    // Gunakan decoded.id (sesuai token)
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return errorResponse(res, "User not found", 404);
@@ -25,10 +28,13 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, "User account is inactive", 403);
     }
 
-    // TAMBAHKAN role dari token ke req.user
+    // Simpan data user untuk digunakan oleh controller
     req.user = {
-      ...user,
-      role: decoded.role, // AMBIL DARI TOKEN
+      id: user.id,
+      username: user.username,
+      role: decoded.role, // role dari token
+      email: user.email,
+      is_active: user.is_active,
     };
 
     next();
@@ -43,6 +49,9 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
+// ======================================================
+// AUTHORIZE (HARUS ROLE TERTENTU)
+// ======================================================
 export const authorize = (...roles) => {
   return async (req, res, next) => {
     try {
@@ -50,10 +59,9 @@ export const authorize = (...roles) => {
         return errorResponse(res, "Authentication required", 401);
       }
 
-      console.log("User role:", req.user.role); // DEBUG
-      console.log("Allowed roles:", roles); // DEBUG
+      console.log("User role:", req.user.role);
+      console.log("Allowed roles:", roles);
 
-      // Gunakan role yang sudah ada di req.user (dari token)
       if (!roles.includes(req.user.role)) {
         return errorResponse(
           res,
@@ -69,25 +77,31 @@ export const authorize = (...roles) => {
   };
 };
 
+// ======================================================
+// OPTIONAL AUTH (LOGIN OPSIONAL)
+// ======================================================
 export const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
-      const token = authHeader.substring(7);
+      const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.userId || decoded.id);
+      const user = await User.findById(decoded.id);
 
       if (user && user.is_active) {
         req.user = {
-          ...user,
+          id: user.id,
+          username: user.username,
           role: decoded.role,
+          email: user.email,
+          is_active: user.is_active,
         };
       }
     }
 
     next();
   } catch (error) {
-    next();
+    next(); // tetap lanjut meski token invalid
   }
 };

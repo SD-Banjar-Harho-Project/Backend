@@ -60,21 +60,19 @@ export const login = async (req, res, next) => {
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    // TAMBAHAN INI - Get role name from database
     const [roles] = await pool.execute(
       "SELECT display_name FROM roles WHERE id = ?",
       [user.role_id]
     );
     const roleName = roles[0]?.display_name || "user";
 
-    // Token sudah include role name
     const token = jwt.sign(
       {
-        id: user.id, // UBAH dari userId jadi id
-        userId: user.id, // Tetap ada untuk backward compatibility
+        id: user.id,
+        userId: user.id,
         username: user.username,
         role_id: user.role_id,
-        role: roleName, // TAMBAHAN INI
+        role: roleName,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
@@ -90,7 +88,7 @@ export const login = async (req, res, next) => {
       {
         user: {
           ...user,
-          role: roleName, // TAMBAHAN INI di response
+          role: roleName, 
         },
         token,
       },

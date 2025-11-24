@@ -25,7 +25,7 @@ router.post(
   authenticate,
   authorize("admin", "superadmin"),
   [
-    body("full_name").notEmpty().withMessage("Full name is required"),
+    body("name").notEmpty().withMessage("Full name is required"),
     body("nip").optional().notEmpty().withMessage("NIP cannot be empty"),
     body("email").optional().isEmail().withMessage("Valid email is required"),
     validate,
@@ -37,7 +37,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("admin", "superadmin"),
-  [body("full_name").notEmpty().withMessage("Full name is required"), validate],
+  [body("name").notEmpty().withMessage("Full name is required"), validate],
   teacherController.updateTeacher
 );
 

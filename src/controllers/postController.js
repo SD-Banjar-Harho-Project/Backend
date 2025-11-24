@@ -4,8 +4,7 @@ import { generateUniqueSlug } from "../utils/slugify.js";
 
 export const getAllPosts = async (req, res, next) => {
   try {
-    const posts = await Post.getAllPost(); // FIX
-
+    const posts = await Post.getAllPost();
     return successResponse(res, posts, "Posts retrieved successfully");
   } catch (error) {
     next(error);
@@ -15,12 +14,9 @@ export const getAllPosts = async (req, res, next) => {
 export const getPostById = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const post = await Post.findById(id);
 
-    if (!post) {
-      return errorResponse(res, "Post not found", 404);
-    }
+    if (!post) return errorResponse(res, "Post not found", 404);
 
     return successResponse(res, post, "Post retrieved successfully");
   } catch (error) {
@@ -33,12 +29,7 @@ export const getPostBySlug = async (req, res, next) => {
     const { slug } = req.params;
     const post = await Post.findBySlug(slug);
 
-    if (!post) {
-      return errorResponse(res, "Post not found", 404);
-    }
-
-    // Karena tidak ada incrementViews() dan getWithTags() di model,
-    // kita hapus dan langsung return post saja.
+    if (!post) return errorResponse(res, "Post not found", 404);
 
     return successResponse(res, post, "Post retrieved successfully");
   } catch (error) {
@@ -52,11 +43,15 @@ export const createPost = async (req, res, next) => {
 
     const slug = await generateUniqueSlug(Post, title);
 
+    // gunakan folder dari upload.js → /uploads/posts/xxxx.jpg
+    const img_url = req.file ? `/uploads/posts/${req.file.filename}` : null;
+
     const postData = {
       title,
       slug,
       content,
       status: status || "draft",
+      img_url,
       author_id: req.user.id,
     };
 
@@ -74,21 +69,23 @@ export const updatePost = async (req, res, next) => {
     const { title, content, status } = req.body;
 
     const existingPost = await Post.findById(id);
-
-    if (!existingPost) {
-      return errorResponse(res, "Post not found", 404);
-    }
+    if (!existingPost) return errorResponse(res, "Post not found", 404);
 
     const slug =
       title && title !== existingPost.title
         ? await generateUniqueSlug(Post, title, id)
         : existingPost.slug;
 
+    const img_url = req.file
+      ? `/uploads/posts/${req.file.filename}`
+      : existingPost.img_url;
+
     const postData = {
       title: title || existingPost.title,
       slug,
       content: content || existingPost.content,
       status: status || existingPost.status,
+      img_url,
     };
 
     const updatedPost = await Post.update(id, postData);
@@ -104,10 +101,7 @@ export const softDeletePost = async (req, res, next) => {
     const { id } = req.params;
 
     const post = await Post.findById(id);
-
-    if (!post) {
-      return errorResponse(res, "Post not found", 404);
-    }
+    if (!post) return errorResponse(res, "Post not found", 404);
 
     await Post.softDelete(id);
 
