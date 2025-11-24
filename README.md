@@ -35,17 +35,9 @@ Backend REST API lengkap untuk sistem manajemen website SD Negeri Bandarharjo me
 
 ### 👥 User Management
 - ✅ CRUD operations untuk users
-- ✅ Multiple roles (superadmin, admin, teacher, staff, user)
+- ✅ Multiple roles (admin, teacher, staff)
 - ✅ Profile management
 - ✅ Password change
-
-### 📝 Content Management
-- ✅ Posts/Articles dengan kategori & tags
-- ✅ SEO-friendly slugs
-- ✅ Featured posts
-- ✅ Status management (draft, published, archived)
-- ✅ View counter
-- ✅ Comment system
 
 ### 👨‍🏫 Teacher Management
 - ✅ CRUD operations untuk data guru
@@ -55,46 +47,6 @@ Backend REST API lengkap untuk sistem manajemen website SD Negeri Bandarharjo me
 ### 📷 Gallery Management
 - ✅ Album galeri dengan items
 - ✅ Photo & video support
-- ✅ Gallery categories
-
-### 💬 Comments System
-- ✅ Nested comments
-- ✅ Comment moderation
-- ✅ Spam detection
-
-### ⚠️ Complaint System
-- ✅ Ticket-based complaints
-- ✅ Status tracking
-- ✅ Assignment to staff
-- ✅ Internal & public responses
-
-### 📧 Contact Messages
-- ✅ Contact form submissions
-- ✅ Reply functionality
-- ✅ Status management
-
-### 🔔 Notifications
-- ✅ Real-time notifications
-- ✅ Broadcast notifications
-- ✅ Read/unread status
-
-### 📊 Activity Logs
-- ✅ Audit trail
-- ✅ User action tracking
-- ✅ Old/new values comparison
-
-### 🧭 Menu Management
-- ✅ Dynamic menus
-- ✅ Multiple locations
-
-### 🎠 Slider Management
-- ✅ Homepage sliders
-- ✅ Active date range
-- ✅ Display order
-
-### 🔐 Permissions
-- ✅ Granular permissions
-- ✅ Module-based grouping
 
 ---
 
@@ -134,16 +86,8 @@ Backend_kp/
 │   │   ├── Post.js                  # Post model
 │   │   ├── Teacher.js               # Teacher model
 │   │   ├── Gallery.js               # Gallery model
-│   │   ├── Comment.js               # Comment model
-│   │   ├── Complaint.js             # Complaint model
-│   │   ├── ComplaintResponse.js     # Complaint response model
-│   │   ├── ContactMessage.js        # Contact message model
-│   │   ├── Menu.js                  # Menu model
-│   │   ├── Slider.js                # Slider model
-│   │   ├── Notification.js          # Notification model
-│   │   ├── ActivityLog.js           # Activity log model
-│   │   └── Permission.js            # Permission model
-│   │
+│   │   ├── ...                      # Other models
+│   │ 
 │   ├── controllers/                 # Business logic
 │   │   ├── authController.js        # Authentication
 │   │   ├── userController.js        # User CRUD
@@ -157,6 +101,7 @@ Backend_kp/
 │   │   ├── postRoutes.js           
 │   │   ├── teacherRoutes.js        
 │   │   └── index.js                 # Route aggregator
+│   │   └── ...                      # other routes            
 │   │
 │   ├── middleware/                  # Middleware functions
 │   │   ├── authMiddleware.js        # JWT auth & authorization
@@ -169,9 +114,6 @@ Backend_kp/
 │       └── pagination.js            # Pagination helper
 │
 ├── uploads/                         # File upload directory
-│   ├── posts/
-│   ├── teachers/
-│   └── galleries/
 │
 ├── docs/                            # Documentation
 │   ├── API_DOCUMENTATION.md         # ✅ API endpoints
@@ -254,9 +196,9 @@ Dependencies yang akan terinstall:
 5. Klik **"Create"**
 
 #### C. Import Database Schema
-1. Klik database `dbsdnbandarharjo`
+1. Klik database `kp_sidkominfo`
 2. Klik tab **"Import"**
-3. Choose file: `dbsdnbandarharjo.sql`
+3. Choose file: `kp_diskominfo.sql`
 4. Klik **"Go"**
 5. Tunggu sampai selesai import
 
@@ -313,26 +255,26 @@ NODE_ENV=development
 # ===========================================
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=                        # Kosongkan jika tidak ada password
-DB_NAME=dbsdnbandarharjo
+DB_PASSWORD=
+DB_NAME=kp_diskominfo
 DB_PORT=3306
 
 # ===========================================
 # JWT CONFIGURATION
 # ===========================================
-# PENTING: Ganti dengan random string minimal 32 karakter!
-# Generate di: https://randomkeygen.com/
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-min-32-chars
+JWT_SECRET=your-super-secret-jwt-key-change-this-min-32-chars-long-for-security
 JWT_EXPIRES_IN=7d
 
 # ===========================================
 # CORS CONFIGURATION
 # ===========================================
-# Frontend URLs (separated by comma)
-CORS_ORIGIN=http://localhost:3000,http://localhost:5173
+CORS_ORIGIN=http://localhost:5173
 
-# For production, add your frontend domain:
-# CORS_ORIGIN=http://localhost:3000,https://your-frontend.vercel.app
+# ===========================================
+# FILE UPLOAD CONFIGURATION
+# ===========================================
+UPLOAD_PATH=./uploads
+MAX_FILE_SIZE=5242880
 ```
 
 **⚠️ PENTING:**
@@ -548,143 +490,6 @@ export const deletePost = async (id) => {
 };
 ```
 
-### 🎨 Example React Component
-
-Buat file `src/pages/PostsPage.jsx`:
-
-```javascript
-import { useState, useEffect } from 'react';
-import { getPosts } from '../services/postService';
-import { Link } from 'react-router-dom';
-
-function PostsPage() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const data = await getPosts(1, 10, { status: 'published' });
-      if (data.success) {
-        setPosts(data.data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
-
-  return (
-    <div>
-      <h1>Artikel & Berita</h1>
-      <div className="posts-grid">
-        {posts.map((post) => (
-          <article key={post.id}>
-            <h2>{post.title}</h2>
-            <p>{post.excerpt}</p>
-            <Link to={`/posts/${post.slug}`}>Baca Selengkapnya</Link>
-          </article>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default PostsPage;
-```
-
-### 🛡️ Protected Route Component
-
-Buat file `src/components/ProtectedRoute.jsx`:
-
-```javascript
-import { Navigate } from 'react-router-dom';
-import { isAuthenticated, getCurrentUser } from '../services/authService';
-
-function ProtectedRoute({ children, requiredRole }) {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (requiredRole) {
-    const user = getCurrentUser();
-    if (user.role !== requiredRole) {
-      return <Navigate to="/unauthorized" replace />;
-    }
-  }
-
-  return children;
-}
-
-export default ProtectedRoute;
-```
-
-### 🗺️ Setup Routes
-
-Update `src/App.jsx`:
-
-```javascript
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
-
-// Pages
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import PostsPage from './pages/PostsPage';
-import PostDetailPage from './pages/PostDetailPage';
-import Dashboard from './pages/Dashboard';
-import AdminDashboard from './pages/admin/Dashboard';
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/posts" element={<PostsPage />} />
-        <Route path="/posts/:slug" element={<PostDetailPage />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Admin Only Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
-```
-
-### 📚 Dokumentasi Lengkap
-
-Untuk panduan lengkap integrasi dengan React, lihat:
-**[📖 REACT_INTEGRATION.md](docs/REACT_INTEGRATION.md)**
-
----
-
 ## 📡 API Endpoints
 
 ### Base URL
@@ -738,26 +543,6 @@ PUT    /galleries/:id      - Update gallery (Admin)
 DELETE /galleries/:id      - Delete gallery (Admin)
 ```
 
-### Complaints
-```
-POST   /complaints         - Create complaint (Public)
-GET    /complaints         - Get all complaints (Admin)
-GET    /complaints/:id     - Get complaint by ID (Admin)
-PUT    /complaints/:id     - Update complaint (Admin)
-```
-
-### Contact Messages
-```
-POST   /contact            - Send message (Public)
-GET    /contact            - Get all messages (Admin)
-PUT    /contact/:id/reply  - Reply message (Admin)
-```
-
-### Notifications
-```
-GET    /notifications/me   - Get my notifications
-GET    /notifications/me/unread - Get unread notifications
-PUT    /notifications/:id/read - Mark as read
 ```
 
 Dan masih banyak lagi...
@@ -864,7 +649,7 @@ npm install
 **Test connection:**
 ```bash
 mysql -u root -p
-USE dbsdnbandarharjo;
+USE kp_diskominfo;
 ```
 
 ### ❌ Error: Port already in use
@@ -894,55 +679,6 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 2. Check `JWT_SECRET` is set
 3. Restart server
 
----
-
-## 📚 Documentation
-
-- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
-- **[React Integration Guide](docs/REACT_INTEGRATION.md)** - Step-by-step integration
-- **[Postman Collection](docs/postman/)** - Ready-to-use API collection
-
----
-
-## 🎯 Fitur yang Sudah Diimplementasi
-
-- [x] Authentication & Authorization (JWT)
-- [x] User Management
-- [x] Role-based Access Control
-- [x] Post/Article Management
-- [x] Content Categories
-- [x] Teachers Management
-- [x] Gallery Management
-- [x] Comments System
-- [x] Complaint System
-- [x] Complaint Responses
-- [x] Contact Messages
-- [x] Menu Management
-- [x] Slider Management
-- [x] Notifications
-- [x] Activity Logs
-- [x] Permissions Management
-- [x] Pagination
-- [x] Search & Filter
-- [x] SEO-friendly URLs
-
----
-
-## 📝 TODO / Pengembangan Selanjutnya
-
-- [ ] File upload implementation
-- [ ] Email notifications
-- [ ] Forgot password functionality
-- [ ] Email verification
-- [ ] Image optimization (resize, compress)
-- [ ] API rate limiting
-- [ ] Request logging
-- [ ] API documentation (Swagger)
-- [ ] Unit testing
-- [ ] Integration testing
-- [ ] Caching (Redis)
-
----
 
 ## 🤝 Contributing
 
