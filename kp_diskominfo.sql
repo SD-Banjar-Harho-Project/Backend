@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Nov 2025 pada 14.36
+-- Waktu pembuatan: 27 Nov 2025 pada 04.04
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -40,6 +40,13 @@ CREATE TABLE `galleries` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data untuk tabel `galleries`
+--
+
+INSERT INTO `galleries` (`id`, `title`, `slug`, `descr`, `img`, `video`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'SISWA BERPRESTASI', '', 'wquidfgaslbdqwjbdiouqbwd', 'C:\\Users\\NHQE1\\OneDrive\\Documents\\KP\\Kp_Backend\\uploads\\general\\img1-1763952248028-837016918.jpeg', '', 'draft', '2025-11-24 02:44:08', '2025-11-24 02:44:08', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -53,10 +60,21 @@ CREATE TABLE `posts` (
   `slug` varchar(255) NOT NULL,
   `content` longtext NOT NULL,
   `status` enum('draft','published','archived') NOT NULL DEFAULT 'draft',
+  `img_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `posts`
+--
+
+INSERT INTO `posts` (`id`, `author_id`, `title`, `slug`, `content`, `status`, `img_url`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 2, 'Test Post 2', 'test-post-2', '<p>This is test content</p>', 'draft', NULL, '2025-11-24 01:41:35', '2025-11-24 01:41:35', NULL),
+(2, 2, 'test upload 22', 'test-upload-22', 'isi content 2', '', '/uploads/posts/img2-1763950722669-926283800.jpeg', '2025-11-24 01:52:48', '2025-11-24 02:19:10', '2025-11-24 02:19:10'),
+(3, 2, 'test upload 1', 'test-upload-1', 'isi content', '', '/uploads/posts/img1-1763950249143-603873430.jpeg', '2025-11-24 02:10:49', '2025-11-24 02:10:49', NULL),
+(4, 2, 'test upload 2', 'test-upload-2', 'isi content 2', '', '/uploads/posts/img2-1763950349825-661990325.jpeg', '2025-11-24 02:12:29', '2025-11-24 02:12:29', NULL);
 
 -- --------------------------------------------------------
 
@@ -79,6 +97,13 @@ CREATE TABLE `profiles` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `profiles`
+--
+
+INSERT INTO `profiles` (`id`, `school_name`, `npsn`, `address`, `phone`, `email`, `website`, `logo`, `accreditation`, `principal_name`, `principal_photo`, `created_at`, `updated_at`) VALUES
+(1, 'SDN BandarHarjo 01', '20329336', 'Jl. Cumi-Cumi Raya No.2, Bandarharjo, Kec. Semarang Utara, Kota Semarang, Jawa Tengah ', '(024) 3551189', '', '', 'C:\\Users\\NHQE1\\OneDrive\\Documents\\KP\\Kp_Backend\\uploads\\general\\img1-1763951939588-734946277.jpeg', '', '', 'C:\\Users\\NHQE1\\OneDrive\\Documents\\KP\\Kp_Backend\\uploads\\general\\img2-1763951939589-727057173.jpeg', '2025-11-24 02:36:30', '2025-11-24 02:38:59');
 
 -- --------------------------------------------------------
 
@@ -111,6 +136,7 @@ INSERT INTO `roles` (`id`, `display_name`, `descrip`, `created_at`, `updated_at`
 
 CREATE TABLE `students` (
   `id` int(11) NOT NULL,
+  `nisn` varchar(20) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `class` varchar(20) NOT NULL,
   `gender` enum('L','P') NOT NULL,
@@ -119,6 +145,13 @@ CREATE TABLE `students` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `students`
+--
+
+INSERT INTO `students` (`id`, `nisn`, `name`, `class`, `gender`, `score_uts`, `score_uas`, `created_at`, `updated_at`) VALUES
+(1, '09876545231312', 'Budi Santoso', '5A', 'L', 85.00, 90.00, '2025-11-27 01:58:04', '2025-11-27 01:58:04');
 
 -- --------------------------------------------------------
 
@@ -173,6 +206,16 @@ CREATE TABLE `teachers` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data untuk tabel `teachers`
+--
+
+INSERT INTO `teachers` (`id`, `user_id`, `nip`, `name`, `photo`, `subject_id`, `class_name`, `email`, `phone`, `bio`, `join_date`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(3, 2, '1978121212340001', 'Siti Nurjanah', NULL, 2, '4A', 'siti.nurjanah@example.com', '081234567890', 'Guru Bahasa Indonesia dengan pengalaman 10 tahun', '2020-07-12', 1, '2025-11-24 03:00:05', '2025-11-24 03:00:05', NULL),
+(6, 2, '1978121212340012', 'Siti Busika', NULL, 3, '4', 'siti.Bu@example.com', '08123450987', 'Guru Bahasa Inggris dengan pengalaman 10 tahun', '2020-07-12', 1, '2025-11-24 03:11:05', '2025-11-24 03:12:46', '2025-11-24 03:12:46'),
+(8, 2, '2019283715623819', 'EL', NULL, 1, '5', 'EL@example.com', '0987654321', 'Kobokerszz ni boss', '2025-11-27', 1, '2025-11-27 01:09:14', '2025-11-27 01:09:14', NULL),
+(9, 2, '1231526474373473476', 'fafa', NULL, 5, '7', 'fafa@example.com', '0987667586723', NULL, '2025-11-27', 1, '2025-11-27 01:17:51', '2025-11-27 01:17:51', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -199,7 +242,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `full_name`, `phone`, `role_id`, `is_active`, `last_login`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'superadmin', 'superadmin@sdnbandarharjo.sch.id', '$2a$10$VQG8J51E.tJr9UPXCxh9Q.6dgvlzlfTqdYx1bR5m03vI9g.WxmHgq', 'Super Administrator', '081234567890', 1, 1, NULL, '2025-11-23 13:00:11', '2025-11-23 13:00:11', NULL);
+(2, 'admin', 'adminpertama@example.com', '$2a$10$gRCL/fYtkjcjQLLKv8c1i.DWw03QYwv4JIT9QfruMYGvI2P48z7/S', 'Updated admin', '081234567999', 1, 1, '2025-11-27 08:52:18', '2025-11-23 15:07:12', '2025-11-27 01:52:18', NULL),
+(5, 'testuser', 'testupdate@example.com', '$2a$10$HaUr0HMb65Wx1/oNReCcrOPaSH0Ujf1yAIeaHP9U.svJwP71YqTDm', 'Updated test', '08978968777', 2, 1, NULL, '2025-11-23 15:35:14', '2025-11-24 01:38:25', NULL),
+(6, 'guru1', 'guru1@example.com', '$2a$10$Q8I.I6l8gGmbt/xrT407e.aKqTNevTqIWoMj2gPUjplSDnZaVLyBy', 'saya guru pertama', '0811111111111111', 2, 1, '2025-11-24 08:37:04', '2025-11-24 01:36:49', '2025-11-24 01:38:49', '2025-11-24 01:38:49'),
+(7, 'testuser2', 'test@example.com', '$2a$10$H47eyhUsLvRvPt1652Emt.CdmsETqGyuqwcYrrIznba8o5tEIUFeG', 'Test User', '081234567890', 2, 1, NULL, '2025-11-24 01:39:39', '2025-11-24 01:39:39', NULL);
 
 -- --------------------------------------------------------
 
@@ -353,19 +399,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `galleries`
 --
 ALTER TABLE `galleries`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `profiles`
 --
 ALTER TABLE `profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `roles`
@@ -377,7 +423,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT untuk tabel `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `subjects`
@@ -389,13 +435,13 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT untuk tabel `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
