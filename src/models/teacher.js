@@ -47,7 +47,7 @@ class Teacher {
   }
 
   // ===============================
-  // ORIGINAL METHODS (TIDAK DIUTAK-ATIK)
+  // ORIGINAL METHODS
   // ===============================
   static async findAll() {
     const [rows] = await pool.execute(
@@ -84,6 +84,36 @@ class Teacher {
     return rows[0];
   }
 
+  // ===============================
+  // FIND DELETED METHODS
+  // ===============================
+  static async findDeleted() {
+    const [rows] = await pool.execute(
+      `SELECT t.*, s.subject_name, u.username 
+       FROM teachers t 
+       LEFT JOIN subjects s ON t.subject_id = s.id 
+       LEFT JOIN users u ON t.user_id = u.id 
+       WHERE t.deleted_at IS NOT NULL 
+       ORDER BY t.deleted_at DESC`
+    );
+    return rows;
+  }
+
+  static async findDeletedById(id) {
+    const [rows] = await pool.execute(
+      `SELECT t.*, s.subject_name, u.username 
+       FROM teachers t 
+       LEFT JOIN subjects s ON t.subject_id = s.id 
+       LEFT JOIN users u ON t.user_id = u.id 
+       WHERE t.id = ? AND t.deleted_at IS NOT NULL`,
+      [id]
+    );
+    return rows[0];
+  }
+
+  // ===============================
+  // CREATE & UPDATE
+  // ===============================
   static async create(data) {
     const {
       user_id,
@@ -158,6 +188,9 @@ class Teacher {
     return this.findById(id);
   }
 
+  // ===============================
+  // DELETE & RESTORE
+  // ===============================
   static async softDelete(id) {
     await pool.execute("UPDATE teachers SET deleted_at = NOW() WHERE id = ?", [
       id,
@@ -165,6 +198,16 @@ class Teacher {
     return true;
   }
 
+  static async restore(id) {
+    await pool.execute("UPDATE teachers SET deleted_at = NULL WHERE id = ?", [
+      id,
+    ]);
+    return this.findById(id);
+  }
+
+  // ===============================
+  // UTILITY METHODS
+  // ===============================
   static async findActive() {
     const [rows] = await pool.execute(
       `SELECT t.*, s.subject_name 

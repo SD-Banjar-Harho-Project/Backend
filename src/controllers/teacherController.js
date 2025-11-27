@@ -51,11 +51,17 @@ export const createTeacher = async (req, res, next) => {
     // AUTO SET user_id sesuai user login
     const user_id = req.user.id;
 
+    // Handle file upload
+    // Path akan seperti: /uploads/teachers/filename.jpg
+    const photo = req.file
+      ? `/uploads/${req.uploadSubDir || "teachers"}/${req.file.filename}`
+      : null;
+
     const payload = {
       user_id,
       nip: req.body.nip || null,
       name: req.body.name,
-      photo: req.body.photo || null,
+      photo,
       subject_id: req.body.subject_id || null,
       class_name: req.body.class_name || null,
       email: req.body.email || null,
@@ -80,11 +86,16 @@ export const updateTeacher = async (req, res, next) => {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) return errorResponse(res, "Teacher not found", 404);
 
+    // Handle file upload - jika ada file baru, gunakan yang baru, jika tidak gunakan yang lama
+    const photo = req.file
+      ? `/uploads/${req.uploadSubDir || "teachers"}/${req.file.filename}`
+      : teacher.photo;
+
     const payload = {
       user_id: req.body.user_id || teacher.user_id,
       nip: req.body.nip || teacher.nip,
       name: req.body.name || teacher.name,
-      photo: req.body.photo || teacher.photo,
+      photo,
       subject_id: req.body.subject_id || teacher.subject_id,
       class_name: req.body.class_name || teacher.class_name,
       email: req.body.email || teacher.email,
